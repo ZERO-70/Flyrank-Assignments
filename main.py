@@ -40,3 +40,21 @@ def init_db():
     conn.close()
 
 init_db()
+
+@app.get("/")
+def root():
+    return {"status":"online", "messege":"backend is runing"}
+
+@app.get("test/{item_id}")
+def return_item(item_id: int, q: str | None = None):
+    return {"item_id": item_id , "query_parameter": q}
+
+@app.get("/tasks")
+def get_tasks():
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM tasks")
+    tasks = cursor.fetchall()
+    conn.close()
+    return [dict(task) for task in tasks]
+
