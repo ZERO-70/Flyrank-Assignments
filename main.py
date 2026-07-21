@@ -58,3 +58,25 @@ def get_tasks():
     conn.close()
     return [dict(task) for task in tasks]
 
+@app.get("/task/{task_id}")
+def get_task(task_id: int):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute ("SELECT * FROM tasks WHERE id = ?", (task_id,))
+    task = cursor.fetchone()
+    conn.close()
+    if task is None:
+        return {"error": "Task not found"}
+    return dict(task)
+
+@app.post("/tasks", status_code=status.HTTP_201_CREATED)
+def create_task(task: Task):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO tasks (title, done) VALUES (?, ?)", (task.title, 0))
+    conn.commit()
+    new_task_id = cursor.lastrowid
+    cursor.execute("SELECT * FROM tasks WHERE id=?", (new_task_id,))
+    new_task = cursor.fetchone()
+    conn.close()
+    return dict(new_task)
