@@ -80,3 +80,38 @@ def create_task(task: Task):
     new_task = cursor.fetchone()
     conn.close()
     return dict(new_task)
+
+@app.put("/tasks/{task_id}")
+def update_task(task_id: int, task_update: TaskUpdate):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM tasks WHERE id=?", (task_id,))
+    existing_task = cursor.fetchone()
+    if existing_task is None:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Task not found")
+    
+    cursor.execute("UPDATE tasks SET title=?, done=? WHERE id=?", (task_update.title, task_update.done, task_id))
+    conn.commit()
+    cursor.execute("SELECT * FROM tasks WHERE id=?", (task_id,))
+    updated_task = cursor.fetchone()
+    conn.close()
+    return dict(updated_task)
+
+@app.delete("/tasks/{task_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_task(task_id: int):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT * FROM tasks WHERE id=?", (task_id,))
+    existing_task = cursor.fetchone()
+    
+    if existing_task is None:
+        conn.close()
+        raise HTTPException(status_code=404, detail="Task not found")
+        
+    cursor.execute("DELETE FROM tasks WHERE id=?", (task_id,))
+    conn.commit()
+    conn.close()
+    
+    return None
