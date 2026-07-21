@@ -1,11 +1,18 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, status
+import sqlite3
+from pydantic import BaseModel
 
 app = FastAPI();
 
-@app.get("/")
-def root():
-    return {"status":"online", "messege":"backend is runing"}
+class Task(BaseModel):
+    title: str
 
-@app.get("/{item_id}")
-def return_item(item_id: int, q: str | None = None):
-    return {"item_id": item_id , "query_parameter": q}
+class TaskUpdate(BaseModel):
+    title: str
+    done: bool
+
+def get_db_connection():
+    conn = sqlite3.connect("task3.db", check_same_thread=False)
+    conn.row_factory = sqlite3.Row
+    return conn
+
