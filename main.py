@@ -1,9 +1,10 @@
 from fastapi import FastAPI, HTTPException, status
-import sqlite3
 from pydantic import BaseModel
 import os
 import psycopg
 from dotenv import load_dotenv
+
+load_dotenv()
 
 app = FastAPI();
 
